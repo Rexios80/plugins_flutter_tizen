@@ -1,22 +1,7 @@
 name: health_tizen
-description: Flutter plugin for accessing the Tizen health sensors.
-version: 0.0.1
-author: Rexios
-homepage: https://github.com/flutter/plugins
-
-environment:
-  sdk: ">=2.12.0 <3.0.0"
-  flutter: ">=1.20.0"
-
-dependencies:
-  flutter:
-    sdk: flutter
-
-  enum_to_string: ^2.0.1
-
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
+description: Tizen implementation of the health plugin.
+homepage: https://github.com/flutter-tizen/plugins
+version: 1.0.0
 
 flutter:
   plugin:
@@ -24,3 +9,13 @@ flutter:
       tizen:
         pluginClass: HealthTizenPlugin
         fileName: health_tizen_plugin.h
+
+dependencies:
+  enum_to_string: ^2.0.1
+
+  flutter:
+    sdk: flutter
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+  flutter: ">=1.20.0"
