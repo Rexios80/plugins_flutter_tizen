@@ -15,12 +15,6 @@ class HealthTizen {
 
   static const MethodChannel _channel = MethodChannel('health_tizen');
 
-  static Future<String> get platformVersion async {
-    final String version =
-        await _channel.invokeMethod<String>('getPlatformVersion') ?? '';
-    return version;
-  }
-
   final StreamController<TizenHealthData> _streamController =
       StreamController<TizenHealthData>.broadcast();
 
