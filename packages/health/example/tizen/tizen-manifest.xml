@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest package="com.example.health_tizen_example" version="1.0.0" api-version="4.0" xmlns="http://tizen.org/ns/packages">
-    <profile name="common"/>
-    <ui-application appid="com.example.health_tizen_example" exec="Runner.dll" type="dotnet" multiple="false" taskmanage="true" nodisplay="false" api-version="4" launch_mode="single">
+<manifest api-version="5.5" package="com.example.health_tizen_example" version="1.0.0"
+    xmlns="http://tizen.org/ns/packages">
+    <profile name="common" />
+    <ui-application api-version="4" appid="com.example.health_tizen_example" exec="Runner.dll"
+        launch_mode="single" multiple="false" nodisplay="false" taskmanage="true" type="dotnet">
         <label>health_tizen_example</label>
         <icon>ic_launcher.png</icon>
-        <metadata key="http://tizen.org/metadata/prefer_dotnet_aot" value="true"/>
-        <metadata key="http://tizen.org/metadata/direct-launch" value="yes"/>
+        <metadata key="http://tizen.org/metadata/prefer_dotnet_aot" value="true" />
+        <metadata key="http://tizen.org/metadata/direct-launch" value="yes" />
     </ui-application>
-    <feature name="http://tizen.org/feature/screen.size.all"/>
+    <feature name="http://tizen.org/feature/screen.size.all" />
     <privileges>
-    	<privilege>http://tizen.org/privilege/healthinfo</privilege>
+        <privilege>http://tizen.org/privilege/healthinfo</privilege>
     </privileges>
 </manifest>

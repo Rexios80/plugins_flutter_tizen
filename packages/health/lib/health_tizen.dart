@@ -7,6 +7,7 @@ import 'dart:async';
 
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/services.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class HealthTizen {
   HealthTizen() {
@@ -15,14 +16,18 @@ class HealthTizen {
 
   static const MethodChannel _channel = MethodChannel('health_tizen');
 
-  final StreamController<TizenHealthData> _streamController =
-      StreamController<TizenHealthData>.broadcast();
+  final StreamController<TizenHealthReading> _streamController =
+      StreamController<TizenHealthReading>.broadcast();
 
-  Stream<TizenHealthData> get stream {
+  Stream<TizenHealthReading> get stream {
     return _streamController.stream;
   }
 
   Future<void> start(List<TizenSensor> sensors) async {
+    final PermissionStatus status = await Permission.sensors.request();
+    if (status.isDenied || status.isPermanentlyDenied) {
+      return Future<void>.error('Health permissions not granted');
+    }
     return _channel.invokeMethod<void>(
         'start', sensors.map(EnumToString.convertToString));
   }
@@ -35,7 +40,7 @@ class HealthTizen {
     try {
       final List<String> arguments = call.arguments as List<String>;
       _streamController.add(
-        TizenHealthData(
+        TizenHealthReading(
           EnumToString.fromString(TizenSensor.values, arguments[0]) ??
               TizenSensor.unknown,
           double.tryParse(arguments[1]) ?? 0,
@@ -54,8 +59,8 @@ enum TizenSensor {
   pedometer,
 }
 
-class TizenHealthData {
-  TizenHealthData(this.sensor, this.value);
+class TizenHealthReading {
+  TizenHealthReading(this.sensor, this.value);
 
   final int timestamp = DateTime.now().millisecondsSinceEpoch;
   final TizenSensor sensor;
