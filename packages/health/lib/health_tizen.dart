@@ -29,7 +29,7 @@ class HealthTizen {
       return Future<void>.error('Health permissions not granted');
     }
     return _channel.invokeMethod<void>(
-        'start', sensors.map(EnumToString.convertToString));
+        'start', sensors.map(EnumToString.convertToString).toList());
   }
 
   Future<void> stop() async {

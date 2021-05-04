@@ -9,25 +9,29 @@
 #include <sstream>
 #include <string>
 #include <sensor.h>
+#include <variant>
 
 #include "log.h"
 
-class HealthTizenPlugin : public flutter::Plugin {
-public:
-    static void RegisterWithRegistrar(flutter::PluginRegistrar *registrar) {
-        auto channel =
-                std::make_unique<flutter::MethodChannel<flutter::EncodableValue> >(
-                        registrar->messenger(), "health_tizen",
-                        &flutter::StandardMethodCodec::GetInstance());
+using namespace std;
+using namespace flutter;
 
-        auto plugin = std::make_unique<HealthTizenPlugin>();
+class HealthTizenPlugin : public Plugin {
+public:
+    static void RegisterWithRegistrar(PluginRegistrar *registrar) {
+        auto channel =
+                make_unique<MethodChannel<EncodableValue> >(
+                        registrar->messenger(), "health_tizen",
+                        &StandardMethodCodec::GetInstance());
+
+        auto plugin = make_unique<HealthTizenPlugin>();
 
         channel->SetMethodCallHandler(
                 [plugin_pointer = plugin.get()](const auto &call, auto result) {
-                    HealthTizenPlugin::HandleMethodCall(call, std::move(result));
+                    plugin_pointer->HandleMethodCall(call, move(result));
                 });
 
-        registrar->AddPlugin(std::move(plugin));
+        registrar->AddPlugin(move(plugin));
     }
 
     HealthTizenPlugin() = default;
@@ -35,12 +39,13 @@ public:
     ~HealthTizenPlugin() override = default;
 
 private:
-    static void HandleMethodCall(
-            const flutter::MethodCall<flutter::EncodableValue> &method_call,
-            std::unique_ptr<flutter::MethodResult<flutter::EncodableValue> > result) {
-        // Replace "getPlatformVersion" check with your plugin's method.
+    void HandleMethodCall(
+            const MethodCall<EncodableValue> &method_call,
+            unique_ptr<MethodResult<EncodableValue> > result) {
+        const auto &arguments = *method_call.arguments();
+
         if (method_call.method_name() == "start") {
-            std::string error = start(*method_call.arguments());
+            string error = start(arguments);
             if (error.empty()) {
                 result->Success();
             } else {
@@ -54,9 +59,9 @@ private:
         }
     }
 
-    static std::string start(flutter::EncodableValue arguments) {
-        std::vector<std::string> stringArguments = std::get<std::vector<std::string>>(arguments);
-        for (auto &stringArgument : stringArguments) {
+    string start(const EncodableValue arguments) {
+        while (holds_alternative<string>(arguments)) {
+            string stringArgument = get<string>(arguments);
             if (stringArgument == "hrm") {
                 startHrm();
             } else if (stringArgument == "pedometer") {
@@ -65,9 +70,10 @@ private:
         }
     }
 
-    static sensor_listener_h hrListener;
 
-    static std::string startHrm() {
+    sensor_listener_h hrListener = sensor_listener_h();
+
+    string startHrm() {
         sensor_type_e type = SENSOR_HRM;
         sensor_h sensor;
 
@@ -120,7 +126,7 @@ private:
         }
     }
 
-    static void stop() {
+    void stop() {
         sensor_listener_stop(hrListener);
         sensor_destroy_listener(hrListener);
     }
@@ -129,6 +135,6 @@ private:
 void HealthTizenPluginRegisterWithRegistrar(
         FlutterDesktopPluginRegistrarRef registrar) {
     HealthTizenPlugin::RegisterWithRegistrar(
-            flutter::PluginRegistrarManager::GetInstance()
-                    ->GetRegistrar<flutter::PluginRegistrar>(registrar));
+            PluginRegistrarManager::GetInstance()
+                    ->GetRegistrar<PluginRegistrar>(registrar));
 }
