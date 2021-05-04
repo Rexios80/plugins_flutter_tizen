@@ -19,22 +19,23 @@ using namespace flutter;
 class HealthTizenPlugin : public Plugin {
 public:
     static void RegisterWithRegistrar(PluginRegistrar *registrar) {
+        auto plugin = make_unique<HealthTizenPlugin>(registrar);
+        registrar->AddPlugin(move(plugin));
+    }
+
+    explicit HealthTizenPlugin(PluginRegistrar *registrar) {
         auto channel =
                 make_unique<MethodChannel<EncodableValue> >(
                         registrar->messenger(), "health_tizen",
                         &StandardMethodCodec::GetInstance());
 
-        auto plugin = make_unique<HealthTizenPlugin>();
-
         channel->SetMethodCallHandler(
-                [plugin_pointer = plugin.get()](const auto &call, auto result) {
+                [plugin_pointer = this](const auto &call, auto result) {
                     plugin_pointer->HandleMethodCall(call, move(result));
                 });
 
-        registrar->AddPlugin(move(plugin));
+        channel_ = std::move(channel);
     }
-
-    HealthTizenPlugin() = default;
 
     ~HealthTizenPlugin() override = default;
 
@@ -120,14 +121,19 @@ private:
         sensor_get_type(sensor, &type);
 
         switch (type) {
-            case SENSOR_HRM:
+            case SENSOR_HRM: {
                 dlog_print(DLOG_DEBUG, LOG_TAG, "heartRate: %f", event->values[0]);
+                auto arguments = make_unique<EncodableValue>(EncodableValue(event->values[0]));
+                channel_->InvokeMethod("dataReceived", move(arguments));
                 break;
-            case SENSOR_HUMAN_PEDOMETER:
+            }
+            case SENSOR_HUMAN_PEDOMETER: {
                 dlog_print(DLOG_DEBUG, LOG_TAG, "pedometer: %f", event->values[0]);
                 break;
-            default:
+            }
+            default: {
                 dlog_print(DLOG_ERROR, LOG_TAG, "Unknown event");
+            }
         }
     }
 
@@ -135,7 +141,11 @@ private:
         sensor_listener_stop(hrListener);
         sensor_destroy_listener(hrListener);
     }
+
+    static unique_ptr<MethodChannel<EncodableValue>> channel_;
 };
+
+unique_ptr<MethodChannel<EncodableValue>> HealthTizenPlugin::channel_;
 
 void HealthTizenPluginRegisterWithRegistrar(
         FlutterDesktopPluginRegistrarRef registrar) {
