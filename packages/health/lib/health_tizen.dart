@@ -38,16 +38,18 @@ class HealthTizen {
 
   Future<dynamic> _handleMessage(MethodCall call) {
     try {
-      final List<String> arguments = call.arguments as List<String>;
+      final List<dynamic> arguments = call.arguments as List<dynamic>;
+
       _streamController.add(
         TizenHealthReading(
           EnumToString.fromString(TizenSensor.values, arguments[0]) ??
               TizenSensor.unknown,
-          double.tryParse(arguments[1]) ?? 0,
+          arguments[1] as double,
         ),
       );
       return Future<void>.value();
     } catch (e) {
+      print(e);
       return Future<void>.error(e);
     }
   }

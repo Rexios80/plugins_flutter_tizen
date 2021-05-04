@@ -116,7 +116,7 @@ private:
 
         string userData = "Why do I need this?";
         // Callback for sensor value change
-        error = sensor_listener_set_event_cb(hrListener, 0, on_sensor_event, &userData);
+        error = sensor_listener_set_event_cb(hrListener, 1000, on_sensor_event, &userData);
         if (error != SENSOR_ERROR_NONE) {
             return "sensor_listener_set_event_cb error: " + to_string(error);
         }
@@ -140,7 +140,8 @@ private:
 
         switch (type) {
             case SENSOR_HRM: {
-                auto arguments = make_unique<EncodableValue>(EncodableValue(event->values[0]));
+                EncodableList wrapped = {EncodableValue("hrm"), EncodableValue(event->values[0])};
+                auto arguments = std::make_unique<EncodableValue>(wrapped);
                 channel_->InvokeMethod("dataReceived", move(arguments));
                 break;
             }
