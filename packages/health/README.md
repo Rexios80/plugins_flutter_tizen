@@ -1,6 +1,7 @@
 # health_tizen
 
-Get live health data from Tizen.
+Get live heart rate and more from Tizen in Flutter.
+Currently only heart rate is supported.
 
 ## Getting Started
 
