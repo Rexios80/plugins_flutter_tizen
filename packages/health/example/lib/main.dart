@@ -13,7 +13,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   _MyAppState() {
     final HealthTizen health = HealthTizen();
-    health.start([TizenSensor.hrm]);
+    health.start(<TizenSensor>[TizenSensor.hrm]);
     health.stream.listen((TizenHealthReading event) {
       print('${event.sensor}: ${event.value}');
       if (event.sensor == TizenSensor.hrm) {

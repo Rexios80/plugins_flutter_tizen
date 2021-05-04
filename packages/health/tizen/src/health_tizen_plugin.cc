@@ -61,13 +61,16 @@ private:
     }
 
     string start(const EncodableValue arguments) {
-        string error;
-        while (holds_alternative<string>(arguments)) {
-            string stringArgument = get<string>(arguments);
-            if (stringArgument == "hrm") {
-                error += "\n" + startHrm();
-            } else if (stringArgument == "pedometer") {
-                error += "\n" + startPedometer();
+        string error = "";
+        if (holds_alternative<EncodableList>(arguments)) {
+            const EncodableList argumentList = get<EncodableList>(arguments);
+            for (int i = 0; i < argumentList.size(); i++) {
+                string stringArgument = get<string>(argumentList[i]);
+                if (stringArgument == "hrm") {
+                    error += "\n" + startHrm();
+                } else if (stringArgument == "pedometer") {
+                    error += "\n" + startPedometer();
+                }
             }
         }
 
