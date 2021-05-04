@@ -67,9 +67,9 @@ private:
             for (int i = 0; i < argumentList.size(); i++) {
                 string stringArgument = get<string>(argumentList[i]);
                 if (stringArgument == "hrm") {
-                    error += "\n" + startHrm();
+                    error += "" + startHrm();
                 } else if (stringArgument == "pedometer") {
-                    error += "\n" + startPedometer();
+                    error += "" + startPedometer();
                 }
             }
         }
@@ -78,37 +78,52 @@ private:
     }
 
 
-    sensor_listener_h hrListener = sensor_listener_h();
+    sensor_listener_h hrListener;
 
     string startHrm() {
-        sensor_type_e type = SENSOR_HRM;
         sensor_h sensor;
 
         bool supported;
-        int error = sensor_is_supported(type, &supported);
+        int error = sensor_is_supported(SENSOR_HRM, &supported);
         if (error != SENSOR_ERROR_NONE) {
-            return &"sensor_is_supported error: "[error];
+            return "sensor_is_supported error: " + to_string(error);
         }
 
-        if (supported) {
-            dlog_print(DLOG_DEBUG, LOG_TAG, "HRM is%s supported", supported ? "" : " not");
+        if (!supported) {
+            return "SENSOR_HRM not supported";
+        }
+
+        int count;
+        sensor_h *list;
+
+        error = sensor_get_sensor_list(SENSOR_HRM, &list, &count);
+        if (error != SENSOR_ERROR_NONE) {
+            return "sensor_get_sensor_list error: " + to_string(error);
+        } else {
+            free(list);
+        }
+
+        error = sensor_get_default_sensor(SENSOR_HRM, &sensor);
+        if (error != SENSOR_ERROR_NONE) {
+            return "sensor_get_default_sensor error: " + to_string(error);
         }
 
         // creating an event listener
         error = sensor_create_listener(sensor, &hrListener);
         if (error != SENSOR_ERROR_NONE) {
-            return &"sensor_create_listener error: %d"[error];
+            return "sensor_create_listener error: " + to_string(error);
         }
 
+        string userData = "Why do I need this?";
         // Callback for sensor value change
-        error = sensor_listener_set_event_cb(hrListener, 0, on_sensor_event, nullptr);
+        error = sensor_listener_set_event_cb(hrListener, 0, on_sensor_event, &userData);
         if (error != SENSOR_ERROR_NONE) {
-            return &"sensor_listener_set_event_cb error: %d"[error];
+            return "sensor_listener_set_event_cb error: " + to_string(error);
         }
 
         error = sensor_listener_start(hrListener);
         if (error != SENSOR_ERROR_NONE) {
-            return &"sensor_listener_start error: %d"[error];
+            return "sensor_listener_start error: " + to_string(error);
         }
 
         return "";
@@ -125,13 +140,11 @@ private:
 
         switch (type) {
             case SENSOR_HRM: {
-                dlog_print(DLOG_DEBUG, LOG_TAG, "heartRate: %f", event->values[0]);
                 auto arguments = make_unique<EncodableValue>(EncodableValue(event->values[0]));
                 channel_->InvokeMethod("dataReceived", move(arguments));
                 break;
             }
             case SENSOR_HUMAN_PEDOMETER: {
-                dlog_print(DLOG_DEBUG, LOG_TAG, "pedometer: %f", event->values[0]);
                 break;
             }
             default: {
