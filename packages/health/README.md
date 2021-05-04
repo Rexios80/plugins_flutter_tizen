@@ -1,6 +1,6 @@
 # health_tizen
 
-A new flutter plugin project.
+Get live health data from Tizen.
 
 ## Getting Started
 
