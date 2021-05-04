@@ -60,14 +60,17 @@ private:
     }
 
     string start(const EncodableValue arguments) {
+        string error;
         while (holds_alternative<string>(arguments)) {
             string stringArgument = get<string>(arguments);
             if (stringArgument == "hrm") {
-                startHrm();
+                error += "\n" + startHrm();
             } else if (stringArgument == "pedometer") {
-                startPedometer();
+                error += "\n" + startPedometer();
             }
         }
+
+        return error;
     }
 
 
@@ -103,10 +106,12 @@ private:
         if (error != SENSOR_ERROR_NONE) {
             return &"sensor_listener_start error: %d"[error];
         }
+
+        return "";
     }
 
-    static void startPedometer() {
-
+    string startPedometer() {
+        return "";
     }
 
     static void on_sensor_event(sensor_h sensor, sensor_event_s *event, void *user_data) {
